@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>İngilizce Kelime Ezberleme - 4. Sınıf</title>
+
+  <!-- Facebook / Social preview (Open Graph) -->
+  <meta property="og:title" content="İngilizce Kelime Ezberleme - 4. Sınıf" />
+  <meta property="og:description" content="4. sınıf seviyesine uygun interaktif İngilizce kelime kartları, quiz ve telaffuz." />
+  <meta property="og:type" content="website" />
+  <!-- Sayfa yayına alındıktan sonra bu URL'i kendi canlı resim URL'nizle değiştirin -->
+  <meta property="og:image" content="https://esmerartisttt-netizen.github.io/4.SINIF-INGILIZCE-KELIMELER/preview.png" />
+  <meta property="og:url" content="https://esmerartisttt-netizen.github.io/4.SINIF-INGILIZCE-KELIMELER/" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <style>
+    :root{ --bg:#f7fbff; --card:#fff; --accent:#2b7cff; --muted:#657786; }
+    body{ font-family:Inter, Arial, sans-serif; background:linear-gradient(180deg,#eaf4ff,#f7fbff); margin:0; padding:28px; color:#0f172a; display:flex; align-items:center; justify-content:center; min-height:100vh;}
+    .app{ width:100%; max-width:820px;}
+    header{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+    h1{font-size:1.15rem;margin:0}
+    .card{background:var(--card);border-radius:12px;padding:22px;box-shadow:0 8px 30px rgba(11,22,60,0.06);display:flex;gap:20px;align-items:center;}
+    .word{font-size:2rem;font-weight:700;color:var(--accent)}
+    .translation{color:var(--muted);margin-top:8px}
+    .controls{margin-left:auto;display:flex;gap:8px}
+    button{background:#fff;border:1px solid #e6eef8;padding:8px 12px;border-radius:8px;cursor:pointer}
+    .quiz{margin-top:18px}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header>
+      <h1>İngilizce Kelime Ezberleme (4. Sınıf)</h1>
+      <div class="controls">
+        <button id="shuffleBtn">Karıştır</button>
+        <button id="quizBtn">Quiz</button>
+      </div>
+    </header>
+
+    <section class="card">
+      <div>
+        <div class="word" id="wordText">apple</div>
+        <div class="translation" id="wordTrans">elma (Türkçe)</div>
+      </div>
+      <div style="margin-left:auto">
+        <button id="prevBtn">◀</button>
+        <button id="nextBtn">▶</button>
+        <button id="speakBtn">🔊</button>
+      </div>
+    </section>
+
+    <div class="quiz" id="quizArea" style="display:none"></div>
+  </main>
+
+  <script>
+    const words = [
+      {en:"apple", tr:"elma"},
+      {en:"book", tr:"kitap"},
+      {en:"school", tr:"okul"},
+      {en:"friend", tr:"arkadaş"},
+      {en:"water", tr:"su"},
+      {en:"cat", tr:"kedi"}
+    ];
+
+    let idx = 0;
+    const wordText = document.getElementById('wordText');
+    const wordTrans = document.getElementById('wordTrans');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const quizBtn = document.getElementById('quizBtn');
+    const speakBtn = document.getElementById('speakBtn');
+    const quizArea = document.getElementById('quizArea');
+
+    function show(i){
+      const w = words[i];
+      wordText.textContent = w.en;
+      wordTrans.textContent = w.tr;
+    }
+
+    prevBtn.onclick = ()=>{ idx = (idx-1+words.length)%words.length; show(idx); }
+    nextBtn.onclick = ()=>{ idx = (idx+1)%words.length; show(idx); }
+    shuffleBtn.onclick = ()=>{
+      for(let i=words.length-1;i>0;i--){
+        const j=Math.floor(Math.random()*(i+1)); [words[i],words[j]]=[words[j],words[i]];
+      }
+      idx = 0; show(idx);
+    }
+    speakBtn.onclick = ()=>{
+      const utter = new SpeechSynthesisUtterance(words[idx].en);
+      utter.lang = 'en-US';
+      speechSynthesis.speak(utter);
+    }
+
+    quizBtn.onclick = ()=>{
+      if(quizArea.style.display==='none'){
+        startQuiz();
+      } else {
+        quizArea.style.display='none';
+        quizArea.innerHTML='';
+      }
+    }
+
+    function startQuiz(){
+      quizArea.style.display='block';
+      quizArea.innerHTML = '';
+      const qWord = words[Math.floor(Math.random()*words.length)];
+      const options = new Set([qWord.tr]);
+      while(options.size<4){
+        options.add(words[Math.floor(Math.random()*words.length)].tr);
+      }
+      const arr = Array.from(options).sort(()=>Math.random()-0.5);
+      const qBox = document.createElement('div');
+      qBox.innerHTML = '<strong>Bu kelimenin Türkçesi hangisi? </strong><div style="margin-top:8px"></div>';
+      arr.forEach(opt=>{
+        const b = document.createElement('button');
+        b.textContent = opt; b.style.marginRight='8px';
+        b.onclick = ()=> {
+          if(opt===qWord.tr) { b.style.borderColor='green'; b.textContent='✔ Doğru — ' + opt; }
+          else { b.style.borderColor='red'; b.textContent='✖ Yanlış — ' + opt; }
+        };
+        qBox.querySelector('div').appendChild(b);
+      });
+      qBox.querySelector('strong').insertAdjacentText('beforeend',' "'+qWord.en+'"');
+      quizArea.appendChild(qBox);
+    }
+
+    // ilk gösterim
+    show(0);
+  </script>
+</body>
+</html>
